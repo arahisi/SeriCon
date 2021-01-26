@@ -22,49 +22,83 @@ DEALINGS IN THE SOFTWARE.
 #include <stdint.h>
 #include <stdio.h>
 
+#ifndef SERICON_MESSAGE_ID_SUPPORT
+#define SERICON_MESSAGE_ID_SUPPORT 0
+#endif
+
+#ifndef SERICON_MESSAGE_RESEND_SUPPORT
+#define SERICON_MESSAGE_RESEND_SUPPORT 0
+#endif
+
+#ifndef SERICON_DEFAULT_RX_TIMEOUT
+#define SERICON_DEFAULT_RX_TIMEOUT 10UL
+#endif
+
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif /* __cplusplus */
 
     typedef struct S_SeriCon SeriCon;
     typedef struct S_SeriConHAL SeriConHAL;
-    typedef int(SeriConRx) (void);
-    typedef int(SeriConTx) (uint8_t data);
-    typedef uint16_t (SeriConTimer) (void);
-    struct S_SeriConHAL {
+    typedef int(SeriConRx)(void);
+    typedef int(SeriConTx)(uint8_t data);
+    typedef uint16_t(SeriConTimer)(void);
+    struct S_SeriConHAL
+    {
         SeriConTimer *Timer;
         SeriConRx *Rx;
         SeriConTx *Tx;
     };
-    
-    typedef int (SeriConHandler) (SeriCon *sc, size_t sz, const uint8_t *rx_msg);
 
-    struct S_SeriCon {
+    typedef int(SeriConRxHandler)(size_t rx_sz, const uint8_t *rx_msg, uint8_t* tx_msg);
+
+#define SERICON_RX_STATE_BIT_RESEBD 0x001
+#define SERICON_RX_STATE_BIT_JOB 0x100
+#define SERICON_RX_STATE_BIT_DONE 0x200
+#define SERICON_RX_STATE_BIT_ERROR 0x400
+
+    typedef enum E_SeriConRxState
+    {
+        SeriConRxState_Done = SERICON_RX_STATE_BIT_DONE,
+        SeriConRxState_Normal = SERICON_RX_STATE_BIT_JOB,
+        SeriConRxState_Resend1 = SERICON_RX_STATE_BIT_JOB | SERICON_RX_STATE_BIT_RESEBD,
+        SeriConRxState_Resend2 = SERICON_RX_STATE_BIT_JOB | SERICON_RX_STATE_BIT_RESEBD | (SERICON_RX_STATE_BIT_RESEBD << 1),
+        SeriConRxState_Error = SERICON_RX_STATE_BIT_ERROR
+    } SeriConRxState;
+
+    struct S_SeriCon
+    {
+        SeriConRxState RxState;
         int RxIndex;
         int TxIndex;
-        int RxState;
         int RxSize;
         int TxSize;
         int RxWorkSize;
         int TxWorkSize;
+#if SERICON_MESSAGE_RESEND_SUPPORT
+        int TxLastSize;
+#endif
         uint8_t *RxWorkBuffer;
         uint8_t *TxWorkBuffer;
+        SeriConRxHandler *Handler;
+        const SeriConHAL *HAL;
         uint16_t RxCRC;
         uint16_t RxTime;
         uint16_t RxTimeout;
         uint16_t RX_TIMEOUT;
         uint16_t RxErrorCount;
-        SeriConHandler *Handler;
-        const SeriConHAL *HAL;
+#if SERICON_MESSAGE_ID_SUPPORT
         uint8_t TxID;
         uint8_t RxID;
+#endif
     };
 
     extern void SeriCon_init(SeriCon *sc,
-            size_t rxWorkSize, uint8_t *rxWorkBuffer,
-            size_t txWorkSize, uint8_t *txWorkBuffer,
-            SeriConHandler *handler, const SeriConHAL *hal);
-    extern int SeriCon_send(SeriCon *sc, size_t txSize, const uint8_t *txBuffer);
+                             size_t rxWorkSize, uint8_t *rxWorkBuffer,
+                             size_t txWorkSize, uint8_t *txWorkBuffer,
+                             SeriConRxHandler *handler, const SeriConHAL *hal);
+    extern int SeriCon_send(SeriCon *sc, size_t txSize, const uint8_t *tx_msg);
     uint8_t *SeriCon_getTxBuffer(SeriCon *sc);
     uint16_t SeriCon_getRxErrorCount(SeriCon *sc);
     uint16_t SeriCon_getRxTimeout(SeriCon *sc);

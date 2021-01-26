@@ -21,45 +21,20 @@ DEALINGS IN THE SOFTWARE.
 
 #include <stdint.h>
 #include <stdio.h>
-#include "SeriCon_dep.h"
-
-#define SERICON 0
+#include "SeriCon.h"
 
 class SeriConPP
 {
-	typedef void(RxHandle)(SeriConPP *sc, size_t sz, const uint8_t *rx);
-
 public:
-	SeriConPP(void);
-	SeriConPP(size_t rxWorkSize, uint8_t *rxWorkBuffer, size_t txWorkSize, uint8_t *txWorkBuffer);
-	void begin(size_t rxWorkSize, uint8_t *rxWorkBuffer, size_t txWorkSize, uint8_t *txWorkBuffer, Stream &stream, RxHandle &handle);
-	void begin(Stream &stream, RxHandle &handle);
+	SeriConPP(size_t rxWorkSize, uint8_t *rxWorkBuffer, size_t txWorkSize, uint8_t *txWorkBuffer, SeriConRxHandler *handler, const SeriConHAL *hal);
 	int send(size_t txSize, const uint8_t *txBuffer);
 	uint8_t *getTxBuffer(void);
 	uint32_t getRxErrorCount(void);
 	uint32_t getRxTimeout(void);
-	void setRxTimeout(uint32_t us);
+	void setRxTimeout(uint16_t time);
 	void task(void);
-
 private:
-	Stream *stream;
-	RxHandle *handle;
-	int rxIndex;
-	int txIndex;
-	int rxError;
-	int reqResend;
-	int rxSize;
-	int txSize;
-	int txLastSize;
-	int rxWorkSize;
-	int txWorkSize;
-	uint8_t *rxWorkBuffer;
-	uint8_t *txWorkBuffer;
-	uint16_t rxCRC;
-	uint32_t rxTime;
-	uint32_t rxTimeout;
-	uint32_t RX_TIMEOUT;
-	uint32_t rxErrorCount;
+	SeriCon sc;
 };
 
 #endif /* _SERICON_PP_H_ */
