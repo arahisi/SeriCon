@@ -19,8 +19,6 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _SERICON_PP_H_
 #define _SERICON_PP_H_
 
-#include <stdint.h>
-#include <stdio.h>
 #include "SeriCon.h"
 
 class SeriConPP
