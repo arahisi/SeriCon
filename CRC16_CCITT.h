@@ -1,7 +1,7 @@
 #ifndef _CRC16_CCITT_H_
 #define _CRC16_CCITT_H_
 
-#include "crc_lib.h"
+#include <crc_lib.h>
 
 /*
  CRC16 - CRC16_CCITT
@@ -15,7 +15,7 @@
 #define PROTO extern
 #endif
 
-PROTO const uint16_t_SET CRC16_CCITT
+PROTO const CRC_LIB_DEFINE_TABLESET(uint16_t) CRC16_CCITT
 #ifdef _CRC16_CCITT_
 = {{
 0x0000, 0x1189, 0x2312, 0x329B, 0x4624, 0x57AD, 0x6536, 0x74BF, 

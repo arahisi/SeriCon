@@ -82,7 +82,7 @@ int SeriCon_send(SeriCon *sc, size_t txSize, const uint8_t *txBuffer)
     {
         memcpy(&sc->TxWorkBuffer[4], txBuffer, txSize);
     }
-    txCRC = uint16_t_GetCRC(&CRC16_CCITT, sc->TxWorkBuffer, txSize + 4);
+    txCRC = CRC_LIB_GetCRC(uint16_t, &CRC16_CCITT, sc->TxWorkBuffer, txSize + 4);
     sc->TxWorkBuffer[txSize + 4] = (uint8_t)(txCRC);
     sc->TxWorkBuffer[txSize + 5] = (uint8_t)(txCRC >> 8);
     sc->TxIndex = 0;
@@ -156,7 +156,7 @@ void SeriCon_task(SeriCon *sc)
                         sc->RxCRC = CRC16_CCITT.Initial;
                     }
                     sc->RxWorkBuffer[sc->RxIndex] = (uint8_t)c;
-                    sc->RxCRC = uint16_t_CRC(&CRC16_CCITT, sc->RxWorkBuffer[sc->RxIndex], sc->RxCRC);
+                    sc->RxCRC = CRC_LIB_CRC(uint16_t, &CRC16_CCITT, sc->RxWorkBuffer[sc->RxIndex], sc->RxCRC);
                     if (0 == sc->RxIndex)
                     { // head0
 #if SERICON_MESSAGE_RESEND_SUPPORT
