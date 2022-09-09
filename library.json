@@ -11,9 +11,5 @@
     {
     "name": "Shoji Yamamoto",
     "email": "greatshoji@yahoo.co.jp"
-    },
-    "dependencies":
-    {
-        "external-repo": "https://github.com/arahisi/CRC_lib.git"
     }
 }
